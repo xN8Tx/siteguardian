@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sites",
+  "info": {
+    "singularName": "site",
+    "pluralName": "sites",
+    "displayName": "Site"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "sitemap": {
+      "type": "string"
+    },
+    "url": {
+      "type": "component",
+      "component": "components.url",
+      "repeatable": true
+    }
+  }
+}

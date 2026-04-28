@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "responses",
+  "info": {
+    "singularName": "response",
+    "pluralName": "responses",
+    "displayName": "Response"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::site.site"
+    },
+    "date": {
+      "type": "datetime"
+    },
+    "failedResponse": {
+      "type": "json"
+    },
+    "response": {
+      "type": "json"
+    }
+  }
+}
