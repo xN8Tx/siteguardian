@@ -136,7 +136,7 @@ export default {
       );
     },
     options: {
-      rule: "*/4",
+      rule: "0 */4 * * *",
     },
   },
 };
