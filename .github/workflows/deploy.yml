@@ -1,0 +1,72 @@
+name: Deploy to Prod Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prod_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Получаем код
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Настройка SSH для деплоя
+      - name: Setup SSH-ключа
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+
+      # 3. Деплой на сервер через SSH
+      - name: Deploy to Server
+        id: deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} -p ${{ secrets.PROD_SSH_PORT }} << 'EOF'
+            cd ${{ secrets.PROD_DEPLOY_PATH }}
+            git reset --hard origin/main  
+            git pull origin main          
+            docker compose -f ./configs/prod/docker-compose.yaml up --build -d
+            docker image prune -f
+            docker container prune -f
+          EOF
+
+      # Временно отключено до починки уведомлений
+      # 4. Уведомления о CI/CD
+      #- name: Send CI/CD Notification
+      #  if: always()
+      #  run: |
+      #    payload=$(jq -n \
+      #      --arg type "${{ secrets.NOTIFY_TYPE }}" \
+      #      --arg repo "${{ github.repository }}" \
+      #      --arg branch "${{ github.ref_name }}" \
+      #      --arg actor "${{ github.actor }}" \
+      #      --arg commit "${{ github.event.head_commit.message }}" \
+      #      --arg repo_url "https://github.com/${{ github.repository }}" \
+      #      --arg workflow_url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+      #      --arg commit_url "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" \
+      #      --argjson success ${{ steps.deploy.outcome == 'success' }} \
+      #      --argjson failure ${{ steps.deploy.outcome == 'failure' }} \
+      #      --argjson cancelled ${{ steps.deploy.outcome == 'cancelled' }} \
+      #      '{
+      #        type: $type,
+      #        data: {
+      #          repo: $repo,
+      #          branch: $branch,
+      #          actor: $actor,
+      #          commit: $commit,
+      #          repo_url: $repo_url,
+      #          workflow_url: $workflow_url,
+      #          commit_url: $commit_url,
+      #          success: $success,
+      #          failure: $failure,
+      #          cancelled: $cancelled
+      #        }
+      #      }')
+
+      #    curl -X POST "${{ secrets.NOTIFY_APP_URL }}" \
+      #      -H "Content-Type: application/json" \
+      #      -H "app-token: ${{ secrets.NOTIFY_APP_TOKEN }}" \
+      #      -d "$payload"

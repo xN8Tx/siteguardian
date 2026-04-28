@@ -1,0 +1,13 @@
+services:
+  siteguardian:
+    build:
+      context: ../../app/
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ../../app/public/:/app/public
+      - ../../app/.tmp/:/app/.tmp
+    ports:
+      - "1338:1337"
+    env_file:
+      - ./.env
